@@ -1,0 +1,51 @@
+name: Gatling Performance Tests
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+  workflow_dispatch:
+    inputs:
+      users:
+        description: "Number of virtual users"
+        required: false
+        default: "5"
+      rampDuration:
+        description: "Ramp-up duration (seconds)"
+        required: false
+        default: "10"
+      gamesToCreate:
+        description: "Games created per user"
+        required: false
+        default: "5"
+
+jobs:
+  gatling:
+    name: Run Gatling Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: maven
+
+      - name: Run Gatling tests
+        run: |
+          mvn clean gatling:test \
+            -Dusers=${{ github.event.inputs.users || 5 }} \
+            -DrampDuration=${{ github.event.inputs.rampDuration || 10 }} \
+            -DgamesToCreate=${{ github.event.inputs.gamesToCreate || 5 }}
+
+      - name: Upload Gatling report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gatling-report
+          path: target/gatling
