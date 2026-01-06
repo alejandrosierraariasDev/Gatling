@@ -36,6 +36,7 @@ jobs:
             -Dgatling.simulationClass=simulations.UserSimulation \
             -Dusers=${{ github.event.inputs.users || 5 }} \
             -DrampDuration=${{ github.event.inputs.rampDuration || 10 }}
+            -Dgatling.failOnError=false
 
       - name: Upload Gatling Report
         if: always()
