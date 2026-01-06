@@ -33,9 +33,10 @@ jobs:
           path: ~/.m2
           key: maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: maven-
-
+      - name: List files for debug
+        run: ls -R
       - name: Compile tests
-        run: mvn clean test-compile
+        run: mvn test-compile
 
       - name: Run Gatling simulation
         run: |          
