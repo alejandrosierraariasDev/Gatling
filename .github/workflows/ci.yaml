@@ -28,14 +28,11 @@ jobs:
 
       - name: Compile and Run
         run: |
-          # Forzamos la compilación de TODO el proyecto antes de ejecutar Gatling
-          mvn clean compile test-compile
-          
-          # Ejecutamos la simulación apuntando directamente a la clase
-          mvn gatling:test \
+          # Limpieza y ejecución en un solo bloque Maven bien estructurado
+          mvn clean gatling:test \
             -Dgatling.simulationClass=simulations.UserSimulation \
             -Dusers=${{ github.event.inputs.users || 5 }} \
-            -DrampDuration=${{ github.event.inputs.rampDuration || 10 }}
+            -DrampDuration=${{ github.event.inputs.rampDuration || 10 }} \
             -Dgatling.failOnError=false
 
       - name: Upload Gatling Report
@@ -43,4 +40,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: gatling-report
-          path: "**/target/gatling/*/"
+          path: target/gatling/**
+          retention-days: 30
