@@ -1,20 +1,23 @@
-name: Gatling Performance Tests
+name: Gatling Performance Test
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   pull_request:
+    branches: [ main, master ]
   workflow_dispatch:
     inputs:
       users:
-        description: "Number of users"
-        default: "5"
+        description: 'Number of concurrent users'
+        required: true
+        default: '5'
       rampDuration:
-        description: "Ramp duration (seconds)"
-        default: "10"
+        description: 'Ramp-up duration (seconds)'
+        required: true
+        default: '10'
 
 jobs:
-  gatling:
+  performance-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,27 +27,25 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
           java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
 
-      - name: Cache Maven dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: maven-
-      - name: List files for debug
-        run: ls -R
-      - name: Compile tests
+      - name: Compile Tests
+        working-directory: Gatling
         run: mvn test-compile
 
       - name: Run Gatling simulation
-        run: |          
-          mvn gatling:test          
+        working-directory: Gatling
+        run: |
+          mvn gatling:test \
+            -Dusers=${{ github.event.inputs.users || 5 }} \
+            -DrampDuration=${{ github.event.inputs.rampDuration || 10 }}
 
-      - name: Upload Gatling reports
+      - name: Upload Gatling Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: gatling-report
-          path: target/gatling
+          path: Gatling/target/gatling/*/
+          retention-days: 30
