@@ -24,8 +24,8 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: temurin
-          java-version: 17
+          distribution: 'temurin'
+          java-version: '17'
 
       - name: Cache Maven dependencies
         uses: actions/cache@v4
@@ -38,13 +38,13 @@ jobs:
         run: mvn clean test-compile
 
       - name: Run Gatling simulation
-        run: |
+        run: |          
           mvn gatling:test \
-            -Dgatling.simulationClass=simulations.UserSimulation \
             -Dusers=${{ github.event.inputs.users || 5 }} \
             -DrampDuration=${{ github.event.inputs.rampDuration || 10 }}
 
       - name: Upload Gatling reports
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: gatling-report
