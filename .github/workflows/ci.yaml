@@ -3,8 +3,6 @@ name: Gatling Performance Test
 on:
   push:
     branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
   workflow_dispatch:
     inputs:
       users:
@@ -31,13 +29,21 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Compile Tests
-        working-directory: Gatling
-        run: mvn test-compile
-
-      - name: Run Gatling simulation
-        working-directory: Gatling
+      - name: Debug - List Directories
         run: |
+          echo "Buscando el archivo pom.xml..."
+          find . -name "pom.xml"
+          echo "Estructura actual:"
+          ls -R
+
+      - name: Run Gatling
+        run: |
+          # Este comando busca el pom.xml y ejecuta maven en esa carpeta automáticamente
+          POM_PATH=$(find . -name "pom.xml" | head -n 1)
+          POM_DIR=$(dirname "$POM_PATH")
+          echo "Ejecutando en: $POM_DIR"
+          
+          cd "$POM_DIR"
           mvn gatling:test \
             -Dusers=${{ github.event.inputs.users || 5 }} \
             -DrampDuration=${{ github.event.inputs.rampDuration || 10 }}
@@ -47,5 +53,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: gatling-report
-          path: Gatling/target/gatling/*/
+          # Buscamos el reporte donde quiera que se haya generado
+          path: "**/target/gatling/*/"
           retention-days: 30
