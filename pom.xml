@@ -35,7 +35,6 @@
                         <jvmArg>--enable-native-access=ALL-UNNAMED</jvmArg>
                         <jvmArg>-Dsun.nio.ch.bugLevel=check</jvmArg>
                         <jvmArg>--add-opens=java.base/java.util=ALL-UNNAMED</jvmArg>
-                        <jvmArg>-Dlogback.configurationFile=src/test/resources/logback.xml</jvmArg>
                         <jvmArg>-Dlogback.configurationFile=${project.basedir}/src/test/resources/logback.xml</jvmArg>
                     </jvmArgs>
                 </configuration>
