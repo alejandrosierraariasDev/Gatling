@@ -2,49 +2,49 @@ name: Gatling Performance Tests
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: [ main ]
   pull_request:
-    branches: [ "main", "develop" ]
   workflow_dispatch:
     inputs:
       users:
-        description: "Number of virtual users"
-        required: false
+        description: "Number of users"
         default: "5"
       rampDuration:
-        description: "Ramp-up duration (seconds)"
-        required: false
+        description: "Ramp duration (seconds)"
         default: "10"
-      gamesToCreate:
-        description: "Games created per user"
-        required: false
-        default: "5"
 
 jobs:
   gatling:
-    name: Run Gatling Tests
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Java
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
-          cache: maven
 
-      - name: Run Gatling tests
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: maven-
+
+      - name: Compile tests
+        run: mvn clean test-compile
+
+      - name: Run Gatling simulation
         run: |
-          mvn clean gatling:test \
+          mvn gatling:test \
+            -Dgatling.simulationClass=simulations.UserSimulation \
             -Dusers=${{ github.event.inputs.users || 5 }} \
-            -DrampDuration=${{ github.event.inputs.rampDuration || 10 }} \
-            -DgamesToCreate=${{ github.event.inputs.gamesToCreate || 5 }}
+            -DrampDuration=${{ github.event.inputs.rampDuration || 10 }}
 
-      - name: Upload Gatling report
-        if: always()
+      - name: Upload Gatling reports
         uses: actions/upload-artifact@v4
         with:
           name: gatling-report
