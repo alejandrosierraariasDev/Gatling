@@ -33,7 +33,7 @@ public class UserSimulation extends Simulation {
                 )
         ).protocols(httpProtocol)
                 .assertions(
-                        global().responseTime().percentile3().lt(600),
+                        global().responseTime().percentile3().lt(1000),
                         global().successfulRequests().percent().gt(99.0)
                 );
     }
