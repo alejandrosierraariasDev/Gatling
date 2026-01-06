@@ -39,9 +39,7 @@ jobs:
 
       - name: Run Gatling simulation
         run: |          
-          mvn gatling:test \
-            -Dusers=${{ github.event.inputs.users || 5 }} \
-            -DrampDuration=${{ github.event.inputs.rampDuration || 10 }}
+          mvn gatling:test          
 
       - name: Upload Gatling reports
         if: always()
