@@ -7,17 +7,14 @@ on:
     inputs:
       users:
         description: 'Number of concurrent users'
-        required: true
         default: '5'
       rampDuration:
         description: 'Ramp-up duration (seconds)'
-        required: true
         default: '10'
 
 jobs:
   performance-test:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -29,21 +26,9 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Debug - List Directories
-        run: |
-          echo "Buscando el archivo pom.xml..."
-          find . -name "pom.xml"
-          echo "Estructura actual:"
-          ls -R
-
       - name: Run Gatling
+        # Ya no necesitamos "working-directory" ni scripts de búsqueda
         run: |
-          # Este comando busca el pom.xml y ejecuta maven en esa carpeta automáticamente
-          POM_PATH=$(find . -name "pom.xml" | head -n 1)
-          POM_DIR=$(dirname "$POM_PATH")
-          echo "Ejecutando en: $POM_DIR"
-          
-          cd "$POM_DIR"
           mvn gatling:test \
             -Dusers=${{ github.event.inputs.users || 5 }} \
             -DrampDuration=${{ github.event.inputs.rampDuration || 10 }}
@@ -53,6 +38,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: gatling-report
-          # Buscamos el reporte donde quiera que se haya generado
-          path: "**/target/gatling/*/"
+          path: target/gatling/*/
           retention-days: 30
